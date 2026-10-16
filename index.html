@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Related Rates: Draining Tank</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #eef6fc;
+  color: #203040;
+  text-align: center;
+  margin: 0;
+  padding: 25px;
+}
+h1 { color: #15324b; }
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: white;
+  padding: 24px;
+  border-radius: 18px;
+  box-shadow: 0 5px 20px #0001;
+}
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  align-items: center;
+}
+svg { width: 100%; max-width: 430px; }
+.explanation {
+  max-width: 380px;
+  text-align: left;
+  line-height: 1.7;
+}
+button {
+  padding: 12px 18px;
+  margin: 8px;
+  border: none;
+  border-radius: 8px;
+  background: #176a9a;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+input { accent-color: #268cc8; width: 80%; }
+.answer {
+  background: #e6f7eb;
+  border-radius: 10px;
+  padding: 14px;
+  color: #17683a;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Draining Cylindrical Water Tank</h1>
+  <p>Explore how the water level and volume change over time.</p>
+
+  <div class="content">
+    <div>
+      <svg viewBox="0 0 400 390" aria-label="Animated draining water tank">
+        <defs>
+          <linearGradient id="water" x1="0" x2="1">
+            <stop offset="0%" stop-color="#55b8e8"/>
+            <stop offset="100%" stop-color="#a5e3ff"/>
+          </linearGradient>
+          <clipPath id="tank">
+            <path d="M90 80 A110 25 0 0 1 310 80
+                     L310 320 A110 25 0 0 1 90 320 Z"/>
+          </clipPath>
+        </defs>
+
+        <!-- Tank -->
+        <path d="M90 80 A110 25 0 0 1 310 80
+                 L310 320 A110 25 0 0 1 90 320 Z"
+              fill="#f8fcff" stroke="#15324b" stroke-width="3"/>
+
+        <!-- Moving water -->
+        <g clip-path="url(#tank)">
+          <rect id="waterFill" x="90" y="200"
+                width="220" height="120" fill="url(#water)"/>
+          <ellipse id="surface" cx="200" cy="200"
+                   rx="110" ry="25"
+                   fill="#8edbff" stroke="#268cc8" stroke-width="2"/>
+        </g>
+
+        <!-- Tank outline -->
+        <path d="M90 80 L90 320
+                 A110 25 0 0 0 310 320 L310 80"
+              fill="none" stroke="#15324b" stroke-width="3"/>
+
+        <!-- Diameter -->
+        <line x1="90" y1="45" x2="310" y2="45"
+              stroke="#15324b" stroke-width="2"/>
+        <text x="200" y="32" text-anchor="middle"
+              font-size="15" fill="#15324b">
+          Diameter = 3 ft
+        </text>
+
+        <!-- Height -->
+        <line x1="340" y1="80" x2="340" y2="320"
+              stroke="#15324b" stroke-width="2"/>
+        <text x="360" y="200" text-anchor="middle"
+              font-size="14" fill="#15324b"
+              transform="rotate(90 360 200)">
+          Height = 6 ft
+        </text>
+
+        <!-- Falling arrow -->
+        <line x1="55" y1="180" x2="55" y2="225"
+              stroke="#ff9f43" stroke-width="4"/>
+        <polygon points="47,218 63,218 55,232"
+                 fill="#ff9f43"/>
+        <text x="55" y="165" text-anchor="middle"
+              fill="#b86612" font-size="15">h(t)</text>
+      </svg>
+
+      <p><strong>Water height: <span id="height">3.0</span> ft</strong></p>
+      <input id="slider" type="range" min="0.2"
+             max="6" step="0.1" value="3">
+      <br>
+      <button onclick="play()">▶ Animate draining</button>
+      <button onclick="reset()">↺ Reset</button>
+      <p>Water volume: <strong id="volume">6.75π</strong> ft³</p>
+    </div>
+
+    <div class="explanation">
+      <h2>Step-by-Step Solution</h2>
+
+      <p><strong>1. Find the radius.</strong><br>
+      Diameter = 3 ft, so r = 1.5 ft.</p>
+
+      <p><strong>2. Convert the water-level rate.</strong><br>
+      The water drops 4 inches per minute:<br>
+      dh/dt = -4/12 = -1/3 ft/min.</p>
+
+      <p><strong>3. Use the volume formula.</strong><br>
+      V = πr²h<br>
+      V = π(1.5)²h = 2.25πh.</p>
+
+      <p><strong>4. Differentiate.</strong><br>
+      dV/dt = 2.25π(dh/dt)<br>
+      dV/dt = 2.25π(-1/3).</p>
+
+      <div class="answer">
+        Answer: (D)<br>
+        -0.75π cubic feet per minute
+      </div>
+
+      <p>The negative sign means the amount of water
+      in the tank is decreasing.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const slider = document.getElementById("slider");
+const waterFill = document.getElementById("waterFill");
+const surface = document.getElementById("surface");
+const heightText = document.getElementById("height");
+const volumeText = document.getElementById("volume");
+
+let animationId = null;
+let previousTime = null;
+
+function update(h) {
+  // Six feet corresponds to 240 pixels.
+  const y = 320 - (h / 6) * 240;
+
+  waterFill.setAttribute("y", y);
+  waterFill.setAttribute("height", 350 - y);
+  surface.setAttribute("cy", y);
+
+  heightText.textContent = h.toFixed(1);
+  volumeText.textContent = (2.25 * h).toFixed(2) + "π";
+  slider.value = h;
+}
+
+slider.addEventListener("input", () => {
+  stop();
+  update(Number(slider.value));
+});
+
+function stop() {
+  if (animationId !== null) {
+    cancelAnimationFrame(animationId);
+  }
+  animationId = null;
+  previousTime = null;
+}
+
+function animate(time) {
+  if (previousTime === null) previousTime = time;
+
+  const elapsed = (time - previousTime) / 1000;
+  previousTime = time;
+
+  // Accelerated visual animation:
+  // real rate is -1/3 ft per minute.
+  const newHeight = Number(slider.value) - elapsed * 0.7;
+
+  if (newHeight <= 0.2) {
+    update(0.2);
+    stop();
+    return;
+  }
+
+  update(newHeight);
+  animationId = requestAnimationFrame(animate);
+}
+
+function play() {
+  if (animationId !== null) {
+    stop();
+  } else {
+    animationId = requestAnimationFrame(animate);
+  }
+}
+
+function reset() {
+  stop();
+  update(3);
+}
+
+update(3);
+</script>
+</body>
+</html>
